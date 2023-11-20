@@ -4,8 +4,6 @@ import hashlib
 import tkinter.scrolledtext as scrolledtext
 import pyperclip
 import os
-import sys
-
 def janela_hash():
     def calcular_hash(nome_arquivo, algoritmo='sha256'):
         try:
