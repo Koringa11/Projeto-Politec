@@ -4,6 +4,11 @@ import hashlib
 import tkinter.scrolledtext as scrolledtext
 import pyperclip
 import os
+import datetime
+from moviepy.editor import VideoFileClip
+from pydub import AudioSegment
+
+
 def janela_hash():
     def calcular_hash(nome_arquivo, algoritmo='sha256'):
         try:
@@ -20,12 +25,68 @@ def janela_hash():
     def calcular_hashes_para_varios_arquivos():
         lista_de_arquivos = filedialog.askopenfilenames(title="Selecionar arquivos")
         for nome_arquivo in lista_de_arquivos:
+            # get_name = os.path.basename(nome_arquivo)
+            # get_size = os.path.getsize(nome_arquivo)
+            # get_lastmodified = os.path.getmtime(nome_arquivo)
+            # get_lastmodified = datetime.datetime.fromtimestamp(get_lastmodified)
+            # get_lastmodified = get_lastmodified.strftime("%Y-%m-%d %H:%M:%S")
+
+            # if nome_arquivo.lower().endswith('mp4'):
+            #     clip = VideoFileClip(nome_arquivo)
+            #     duracao_segundos = clip.duration
+            #     duracao_minutos = duracao_segundos / 60
+            #     global resultado_audio
+
+            #     print(f'Nome do arquivo: {get_name}, Tamanho: {get_size/(1024):.0f} KB, Modificado em: {get_lastmodified}, Duração: {duracao_segundos:.2f} segundos ({duracao_minutos:.2f} minutos)')
+            # elif nome_arquivo.lower().endswith('mp3'):
+            #     audio = AudioSegment.from_file(nome_arquivo)
+            #     duracao_segundos = len(audio) / 1000  # convertendo de milissegundos para segundos
+            #     duracao_minutos = duracao_segundos / 60
+
+            #     print(f'Nome do arquivo: {get_name}, Tamanho: {get_size/(1024):.0f} KB, Modificado em: {get_lastmodified}, Duração: {duracao_segundos:.2f} segundos ({duracao_minutos:.2f} minutos)')
+            
+            # else:
+            #     print(f'Nome do arquivo: {get_name}, Tamanho: {get_size/(1024):.0f} KB, Modificado em: {get_lastmodified}')
+
+
             hash = calcular_hash(nome_arquivo)
             if hash:
-                nome_arquivo = os.path.basename(nome_arquivo)  # Obtém apenas o nome do arquivo com a extensão
-                resultado_text.config(state=tk.NORMAL)
-                resultado_text.insert(tk.END, f"{nome_arquivo} e Hash (SHA 256) {hash.upper()}\n")
-                resultado_text.config(state=tk.DISABLED)
+
+                #Variaveis para obter os metadados dos arquivos
+                get_name = os.path.basename(nome_arquivo)
+                get_size = os.path.getsize(nome_arquivo)
+                get_lastmodified = os.path.getmtime(nome_arquivo)
+                get_lastmodified = datetime.datetime.fromtimestamp(get_lastmodified)
+                get_lastmodified = get_lastmodified.strftime("%Y-%m-%d %H:%M:%S")
+
+                #verificar se o arquivo é um vídeo
+                if nome_arquivo.lower().endswith('mp4'):
+                    clip = VideoFileClip(nome_arquivo)
+                    duracao_segundos = clip.duration
+                    duracao_minutos = duracao_segundos / 60
+
+                    resultado_text.config(state=tk.NORMAL)
+                    resultado_text.insert(tk.END, f'Nome do arquivo: {get_name}, Tamanho: {get_size/(1024):.0f} KB, Modificado em: {get_lastmodified}, Duração: {duracao_segundos:.2f} segundos ({duracao_minutos:.2f} minutos) e Hash (SHA 256) {hash.upper()}\n')
+                    resultado_text.config(state=tk.DISABLED)
+
+
+                #verificar se o arquvio é um áudio
+                elif nome_arquivo.lower().endswith('mp3'):
+                    audio = AudioSegment.from_file(nome_arquivo)
+                    duracao_segundos = len(audio) / 1000  # convertendo de milissegundos para segundos
+                    duracao_minutos = duracao_segundos / 60
+
+                    resultado_text.config(state=tk.NORMAL)
+                    resultado_text.insert(tk.END, f'Nome do arquivo: {get_name}, Tamanho: {get_size/(1024):.0f} KB, Modificado em: {get_lastmodified}, Duração: {duracao_segundos:.2f} segundos ({duracao_minutos:.2f} minutos) e Hash (SHA 256) {hash.upper()}\n')
+                    resultado_text.config(state=tk.DISABLED)
+                
+                #Se for arquivo ou foto, mostrar o arquivo
+                else:
+                    resultado_text.config(state=tk.NORMAL)
+                    resultado_text.insert(tk.END, f'Nome do arquivo: {get_name}, Tamanho: {get_size/(1024):.0f} KB, Modificado em: {get_lastmodified} e Hash (SHA 256) {hash.upper()}\n')
+                    resultado_text.config(state=tk.DISABLED)
+                
+
 
     # Função para copiar todos os hashes para a área de transferência
     def copiar_hashes():
@@ -37,6 +98,10 @@ def janela_hash():
         resultado_text.config(state=tk.NORMAL)
         resultado_text.delete(1.0, tk.END)
         resultado_text.config(state=tk.DISABLED)
+
+    #função para obter a data da última modificação
+    
+
 
     # Configuração da janela
     global janela
@@ -62,26 +127,31 @@ def janela_hash():
     apagar_button.pack(pady=10)
     # protocolo para quando fechar a janela, conseguir abrir outra
     # janela.protocol("WM_DELETE_WINDOW", fechar_janela_hash)
-
-
-janela_hash_aberta = False
+    janela.mainloop()
 
 janela_hash()
 
-# Função para abrir a janela de hash
-def abrir_janela_hash():
-    global janela_hash_aberta
 
-    # Verificar se a janela já está aberta e não deixar abrir novamente
-    if not janela_hash_aberta:
-        janela_hash()
-        janela_hash_aberta = True
-# Função para fechar a janela de hash
-def fechar_janela_hash():
-    global janela_hash_aberta
-    janela_hash_aberta = False
-    janela.destroy()
+
+# parametros par a fechar a janela corretamente
+# janela_hash_aberta = False
+
+# janela_hash()
+
+# # Função para abrir a janela de hash
+# def abrir_janela_hash():
+#     global janela_hash_aberta
+
+#     # Verificar se a janela já está aberta e não deixar abrir novamente
+#     if not janela_hash_aberta:
+#         janela_hash()
+#         janela_hash_aberta = True
+# # Função para fechar a janela de hash
+# def fechar_janela_hash():
+#     global janela_hash_aberta
+#     janela_hash_aberta = False
+#     janela.destroy()
     
-if __name__ == "__main__":
-    abrir_janela_hash()
+# if __name__ == "__main__":
+#     abrir_janela_hash()
 
